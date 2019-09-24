@@ -4,8 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <title>小型超市管理系统</title>
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
+    <script>
+        $(function(){
+            $("form").submit(function(){
+                // 通过AJAX发送请求给服务器以校验用户名是否已经存在
+                $.ajax({
+                    type: "GET",
+                    contentType: "application/json; charset=UTF-8",
+                    dataType: "json",
+                    url: "/check_cunchu",
+                    timeout: 1000,
+                    success: function(data){
+                        console.log(data);
+                        if (data["err"] === 0){alert("录入失败");}
+                        else{alert("录入成功");}
+                    },
+                    error: function () {}
+                });
+            });
+        });
+
+    </script>
 </head>
 <body>
-    <h1>你已登陆，欢迎使用超市管理系统</h1>
+    <h1>欢迎使用超市管理系统</h1>
+    <p>录入商品信息</p>
+    <form method="post" action="/after_login">
+        <table>
+            <!--<tr><td>商品ID:</td><td><input type="text" name="ID"></td></tr>-->
+            <tr><td>商品名:</td><td><input type="text" name="TradeName"></td></tr>
+            <tr><td>生产日期:</td><td><input type="text" name="ProducData"></td></tr>
+            <tr><td>入库日期:</td><td><input type="text" name="RDate"></td></tr>
+            <tr><td>保质期:</td><td><input type="text" name="ShelfLife"></td></tr>
+            <tr><td>进价:</td><td><input type="text" name="Pprice"></td></tr>
+            <tr><td>进货数量:</td><td><input type="text" name="QuantityIn"></td></tr>
+            <!--<tr><td></td><td><input type="submit" value="提交"></td></tr>-->
+            <tr><td></td><td><button type="submit">提交</button></td></tr>
+        </table>
+    </form>
 </body>
 </html>

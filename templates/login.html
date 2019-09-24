@@ -46,7 +46,7 @@
                     data: "user_name=" + user_name,
                     timeout: 1000,
                     success: function(data){
-
+                        console.log(data);
                         if (data["err"] === 0) {
                             $("#uname_tips").css("color", "red");
                             $("#uname_tips").css("font-weight", "bold");
