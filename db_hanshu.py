@@ -25,7 +25,7 @@ class oneself_mysql(object):
             self.cursor.execute(sql, args)
             return self.cursor.fetchone()
         except Exception as x:
-            print(x)
+            print("异常", x)
         finally:
             self.close()
 
@@ -187,6 +187,7 @@ def check_ID(ID):
 
 # 修改产品信息
 def upda_infor(data):
+    print("修改产品信息")
     sql = oneself_mysql()
     data = list(data)
     ID = data[0]
@@ -211,8 +212,10 @@ def upda_infor(data):
     print(rsp)
     if rsp == 1 or rsp == 0:
         # 修改成功
+        print("修改成功")
         return 1
     else:
+        print("修改失败")
         # 修改失败
         return 0
 

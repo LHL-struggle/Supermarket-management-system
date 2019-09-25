@@ -7,25 +7,27 @@
     <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
     <script>
         $(function(){
-            // 定义一个全局变量can_submit 初始值为false，表不能提交
-            var can_submit = false;
+            // 当disabled为true时，表单不会提交
+            $("#b1").attr("disabled",true);
 
-            // 提交事件，只有当can_submit返回true才能成功提交
-            $("form").submit(function(){
-                return can_submit;
-            });
+            $("#b1").click(function() {
+                var ID = $("#ID").val();
+                var Price = $("#Price").val();
+                var TradeName = $("#TradeName").val();
+                var RDate = $("#RDate").val();
+                var Pprice = $("#Pprice").val();
+                var QuantityIn = $("#QuantityIn").val();
 
-            $("form").submit(function(){
                 $.ajax({
                     type: "GET",
                     contentType: "application/json; charset=UTF-8",
                     dataType: "json",
                     url: "/check_updata",
-                    timeout: 1000,
+                    data: {"ID":ID, "Price":Price, "TradeName":TradeName, "RDate":RDate, "Pprice":Pprice, "QuantityIn":QuantityIn},
                     success: function(data){
-                        console.log(data);
-                        if (data["ch_up"] === 0){alert("修改失败");}
-                        else{alert("修改成功");}
+                        console.log(data["ch_up"]);
+                        if (data["ch_up"] === 1){alert("修改成功");}
+                        else{alert("修改失败");}
                     },
                     error: function () {}
                 });
@@ -56,19 +58,16 @@
                             $("#s").css("color", "red");
                             $("#s").css("font-weight", "bold");
                             $("#s").text('没有该商品ID');
-                            can_submit = false;
                         }
                         else {
                             $("#s").css("color", "green");
                             $("#s").text('√');
-                            can_submit = true;
-
+                            $('#b1').attr("disabled",false);
                         }
                     },
                     error: function () {}
                 });
             });
-
         });
     </script>
 </head>
@@ -79,12 +78,12 @@
         <form method="post" action="/infor">
         <table>
             <tr><td><label for="ID">商品ID：</label></td><td><input type="text" name="ID" id="ID" placeholder="请输入商品ID,必填"><span id="s" style="margin-left:5px"></span></td></tr>
-            <tr><td>售价:</td><td><input type="text" name="Price"></td></tr>
-            <tr><td>商品名：</td><td><input type="text" name="TradeName"></td></tr>
-            <tr><td>入库日期:</td><td><input type="text" name="RDate"></td></tr>
-            <tr><td>进价:</td><td><input type="text" name="Pprice"></td></tr>
-            <tr><td>进货数量:</td><td><input type="text" name="QuantityIn"></td></tr>
-            <tr><td></td><td><button type="submit">提交</button></td></tr>
+            <tr><td>售价:</td><td><input type="text" id="Price" name="Price"></td></tr>
+            <tr><td>商品名：</td><td><input type="text" id="TradeName" name="TradeName"></td></tr>
+            <tr><td>入库日期:</td><td><input type="text" id="RDate" name="RDate"></td></tr>
+            <tr><td>进价:</td><td><input type="text" id="Pprice" name="Pprice"></td></tr>
+            <tr><td>库存数量:</td><td><input type="text" id="QuantityIn" name="QuantityIn"></td></tr>
+            <tr><td></td><td><button id="b1" type="button">提交</button></td></tr>
         </table>
     </form>
     </div>

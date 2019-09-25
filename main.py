@@ -93,7 +93,11 @@ def check_cunchu():
 # 查看库存
 @LHL.route("/MMBE")
 def MMBE():
-    return render_template("MMBE.html")
+    is_login = request.cookies.get("is_login")
+    if is_login:
+        return render_template("MMBE.html")
+    else:
+        return redirect("/login")
 
 # 库存接口
 @LHL.route("/cmmbe")
@@ -108,27 +112,32 @@ def cmmbe():
     return flask.jsonify(kc)
 
 # 修改商品信息
-@LHL.route("/infor", methods=["GET","POST"])
+@LHL.route("/infor")
 def infor():
-    if request.method == "GET":
+    is_login = request.cookies.get("is_login")
+    if is_login:
         return render_template("infor.html")
-    elif request.method == "POST":
-        ID = request.form.get("ID")                  # 商品ID
-        Price = request.form.get("Price")            # 售价
-        TradeName = request.form.get("TradeName")    # 商品名
-        RDate = request.form.get("RDate")            # 入库日期
-        Pprice = request.form.get("Pprice")          # 进价
-        QuantityIn = request.form.get("QuantityIn")  # 库存
-        data = (ID, Price, TradeName, RDate, Pprice, QuantityIn)
-        up = upda_infor(data)     # 成功返回1 失败返回0
-        rsp["ch_up"] = up
-        return render_template("infor.html")
+    else:
+        return redirect("/login")
+
 
 # 校验是否更新成功
 @LHL.route("/check_updata")
 def check_updata():
     # ch_up:up, up成功1，失败0
+    ID = request.args.get("ID")  # 商品ID
+    Price = request.args.get("Price")  # 售价
+    TradeName = request.args.get("TradeName")  # 商品名
+    RDate = request.args.get("RDate")  # 入库日期
+    Pprice = request.args.get("Pprice")  # 进价
+    QuantityIn = request.args.get("QuantityIn")  # 库存
+    data = (ID, Price, TradeName, RDate, Pprice, QuantityIn)
+    print(data)
+    up = upda_infor(data)  # 成功返回1 失败返回0
+    rsp["ch_up"] = up
+    # return render_template("infor.html")
     return flask.jsonify(rsp)
+
 
 
 
@@ -143,7 +152,11 @@ def Check_ID():
 # 出售商品
 @LHL.route("/sell")
 def sell():
-    return render_template("sell.html")
+    is_login = request.cookies.get("is_login")
+    if is_login:
+        return render_template("sell.html")
+    else:
+        return redirect("/login")
 
 if __name__ == "__main__":
     # LHL.run(host="0.0.0.0", port=80, debug=True)
