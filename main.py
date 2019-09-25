@@ -1,7 +1,8 @@
 from flask import Flask, render_template, request, redirect
 import flask
 import pymysql
-from db_hanshu import check_user_name, user_reg, check_uname_pwd, WriteInfor
+from db_hanshu import check_user_name, user_reg, check_uname_pwd, WriteInfor, findall, date_str, check_ID, upda_infor
+
 
 LHL = Flask(__name__)
 
@@ -83,13 +84,69 @@ def after_login():
     else:
         # 跳转到登录界面
         return redirect("/login")
+
 rsp = {}
 @LHL.route("/check_cunchu")
 def check_cunchu():
     return flask.jsonify(rsp)
 
-if __name__ == "__main__":
-    LHL.run(host="0.0.0.0", port=80, debug=True)
+# 查看库存
+@LHL.route("/MMBE")
+def MMBE():
+    return render_template("MMBE.html")
 
+# 库存接口
+@LHL.route("/cmmbe")
+def cmmbe():
+    kc = {}
+    data = findall("kucun")
+    a = 0
+    for x in data:
+        # date_str(data):datetime.date类型转换为字符型
+        kc[a] = {"ID": x[0], "TradeName": x[1], "ProducData": date_str(x[2]), "RDate": date_str(x[3]), "ShelfLife": x[4], "Pprice": x[5], "Price": x[6], "Inventory": x[7]}
+        a += 1
+    return flask.jsonify(kc)
+
+# 修改商品信息
+@LHL.route("/infor", methods=["GET","POST"])
+def infor():
+    if request.method == "GET":
+        return render_template("infor.html")
+    elif request.method == "POST":
+        ID = request.form.get("ID")                  # 商品ID
+        Price = request.form.get("Price")            # 售价
+        TradeName = request.form.get("TradeName")    # 商品名
+        RDate = request.form.get("RDate")            # 入库日期
+        Pprice = request.form.get("Pprice")          # 进价
+        QuantityIn = request.form.get("QuantityIn")  # 库存
+        data = (ID, Price, TradeName, RDate, Pprice, QuantityIn)
+        up = upda_infor(data)     # 成功返回1 失败返回0
+        rsp["ch_up"] = up
+        return render_template("infor.html")
+
+# 校验是否更新成功
+@LHL.route("/check_updata")
+def check_updata():
+    # ch_up:up, up成功1，失败0
+    return flask.jsonify(rsp)
+
+
+
+# 校验商品ID是否存在
+@LHL.route("/check_ID")
+def Check_ID():
+    ID = request.args.get("ID")
+    ck = check_ID(ID)
+    rsp = {"err": ck}
+    return flask.jsonify(rsp)
+
+# 出售商品
+@LHL.route("/sell")
+def sell():
+    return render_template("sell.html")
+
+if __name__ == "__main__":
+    # LHL.run(host="0.0.0.0", port=80, debug=True)
+    LHL.run(port=80, debug=True)
 
 

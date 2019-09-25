@@ -8,7 +8,6 @@
     <script>
         $(function(){
             $("form").submit(function(){
-                // 通过AJAX发送请求给服务器以校验用户名是否已经存在
                 $.ajax({
                     type: "GET",
                     contentType: "application/json; charset=UTF-8",

@@ -4,13 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <title>小型超市管理系统</title>
+     <style type="text/css"> a {text-decoration:none;} </style>
 </head>
 <body>
     <h1>欢迎使用超市管理系统</h1>
     <!--<p><a href="/login">亲，使用前请登录哦</a></p>-->
     {% if is_login %}
     <p>你已经登录</p>
-    <p><a href="/after_login">1.进货</a></p>
+    <p><a href="/MMBE">1.查看库存</a></p>
+    <p><a href="/after_login">2.进货</a></p>
+    <p><a href="/sell">3.商品出售</a></p>
+    <p><a href="/infor">4.更新商品信息</a></p>
     {% else %}
     <p><a href="/login">亲，请登录！</a></p>
     {% endif %}

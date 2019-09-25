@@ -5,12 +5,13 @@
 # import sys
 import json
 import pymysql
+import datetime
 
 conf = json.load(open("db.json"))  # 配置信息
 
 # 创建数据库类
 class oneself_mysql(object):
-    config = {'host': conf["db_server"], 'user': conf["db_user"], 'password': conf["db_password"], 'db': conf["db_name"], 'charset': 'utf8'}
+    config = {'host': conf["db_server"], 'user': conf["db_user"], 'password': conf["db_password"], 'db': conf["db_name1"], 'charset': 'utf8'}
     # 初始化函数
     def __init__(self):
         self.connection = None
@@ -43,14 +44,19 @@ class oneself_mysql(object):
     # DML数据操作函数（增删改）
     def Execute_DML(self, sql, args):
         try:
+            print("wo1")
             self.connection = pymysql.connect(**oneself_mysql.config)
             self.cursor = self.connection.cursor()
             H = self.cursor.execute(sql, args)   # 有返回值：返回的是执行此语句所影响的行数
             self.connection.commit()
-            return '所影响行数为：%s' % (H)
+            print("wo1")
+            # 所影响行数为
+            return H
         except Exception as x:
             self.connection.rollback()
             print(x)
+            # 失败
+            return 2
         finally:
             self.close()
 
@@ -154,3 +160,68 @@ def WriteInfor(data):
         # 关闭数据库连接
         conn.close()
     return bool(r)
+
+# 查看所有库存
+# table 为表名，类型字符串
+def findall(table):
+    # 创建数据库类的对象
+    sql_0 = oneself_mysql()
+    select_sq0 = 'select * from %s' % (table)
+    data = sql_0.getall(select_sq0)
+    return data
+
+# 校验ID是否存在
+def check_ID(ID):
+    '''
+    :param name:
+    :return: ID存在返回1，不存在返回0
+    '''
+    # 创建数据库类的对象
+    sql = oneself_mysql()
+    select_sql = 'select * from kucun where ID=%s' % (ID,)
+    data = sql.getone(select_sql)
+    if data:
+        # 存在
+        return 1
+    return 0
+
+# 修改产品信息
+def upda_infor(data):
+    sql = oneself_mysql()
+    data = list(data)
+    ID = data[0]
+    select_sql = 'select Price, TradeName, RDate, Pprice, Inventory  from kucun where ID=%s' % (ID,)
+    Infor = sql.getone(select_sql)    # 得到商品信息
+    print(Infor)
+    if len(data[1].replace(" ", "")) == 0:     # Price
+        data[1] = Infor[0]
+    if len(data[2].replace(" ", "")) == 0:     # TradeName
+        data[2] = Infor[1]
+    if len(data[3].replace(" ", "")) == 0:     # RDate
+        data[3] = Infor[2]
+    if len(data[4].replace(" ", "")) == 0:     # Pprice
+        data[4] = Infor[3]
+    if len(data[5].replace(" ", "")) == 0:     # QuantityIn
+        data[5] = Infor[4]
+    list_1 = data[1:]
+    list_1.append(ID)
+    data = tuple(list_1)
+    upda_sql = "update kucun set Price=%s, TradeName=%s, RDate=%s, Pprice=%s, Inventory=%s where ID=%s"
+    rsp = sql.Execute_DML(upda_sql, data)
+    print(rsp)
+    if rsp == 1 or rsp == 0:
+        # 修改成功
+        return 1
+    else:
+        # 修改失败
+        return 0
+
+
+
+# 将时间类型转换为字符创类型
+def date_str(data):
+    '''
+    :param data: datetime.date类型,时间数据
+    :return: 字符串型时间数据
+    '''
+    return data.strftime("%Y-%m-%d")

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>小型超市管理系统</title>
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
+    <script>
+        $(function(){
+            // 定义一个全局变量can_submit 初始值为false，表不能提交
+            var can_submit = false;
+
+            // 提交事件，只有当can_submit返回true才能成功提交
+            $("form").submit(function(){
+                return can_submit;
+            });
+
+            $("form").submit(function(){
+                $.ajax({
+                    type: "GET",
+                    contentType: "application/json; charset=UTF-8",
+                    dataType: "json",
+                    url: "/check_updata",
+                    timeout: 1000,
+                    success: function(data){
+                        console.log(data);
+                        if (data["ch_up"] === 0){alert("修改失败");}
+                        else{alert("修改成功");}
+                    },
+                    error: function () {}
+                });
+            });
+
+            // 焦点事件，当输入框失去焦点便触发事件
+            $('input[name="ID"]').blur(function(){
+                // 获取ID的值
+                var ID = $(this).val();
+                // 去除ID的空格
+                ID = ID.replace(/^\s+|s+$/gm, '');
+
+                if (ID.length === 0){
+                    $("#s").html('ID不能为空');
+                    can_submit = false;
+                    return;
+                }
+
+                $.ajax({
+                    type: "GET",
+                    contentType: "application/json; charset=UTF-8",
+                    dataType: "json",
+                    url: "/check_ID",
+                    data: {"ID":ID},
+                    success: function(data){
+                        console.log(data);
+                        if (data["err"] === 0) {
+                            $("#s").css("color", "red");
+                            $("#s").css("font-weight", "bold");
+                            $("#s").text('没有该商品ID');
+                            can_submit = false;
+                        }
+                        else {
+                            $("#s").css("color", "green");
+                            $("#s").text('√');
+                            can_submit = true;
+
+                        }
+                    },
+                    error: function () {}
+                });
+            });
+
+        });
+    </script>
+</head>
+<body>
+    <h1>欢迎使用超市管理系统</h1>
+    <p>修改商品信息</p>
+    <div id="d1">
+        <form method="post" action="/infor">
+        <table>
+            <tr><td><label for="ID">商品ID：</label></td><td><input type="text" name="ID" id="ID" placeholder="请输入商品ID,必填"><span id="s" style="margin-left:5px"></span></td></tr>
+            <tr><td>售价:</td><td><input type="text" name="Price"></td></tr>
+            <tr><td>商品名：</td><td><input type="text" name="TradeName"></td></tr>
+            <tr><td>入库日期:</td><td><input type="text" name="RDate"></td></tr>
+            <tr><td>进价:</td><td><input type="text" name="Pprice"></td></tr>
+            <tr><td>进货数量:</td><td><input type="text" name="QuantityIn"></td></tr>
+            <tr><td></td><td><button type="submit">提交</button></td></tr>
+        </table>
+    </form>
+    </div>
+
+</body>
+</html>

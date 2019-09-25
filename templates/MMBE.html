@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>小型超市管理系统</title>
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
+        <script>
+        $(function(){
+                // 通过AJAX发送请求给服务器以校验用户名是否已经存在
+                $.ajax({
+                    type: "GET",
+                    contentType: "application/json; charset=UTF-8",
+                    dataType: "json",
+                    url: "/cmmbe",
+                    timeout: 1000,
+                    success: function(data){
+                        console.log(data);
+                        var data;
+                        // 库存属性
+                        var shuxin = "<tr><th>商品ID</th><th>商品名</th><th>生产日期</th><th>入库日期</th><th>保质期</th><th>进价</th><th>售价</th><th>库存</th></tr>"
+                        $("#t1").append(shuxin);
+                        for (var x in data){
+                            console.log(x);
+                            var news_html = '<tr><td>' + data[x].ID + '</td><td>' + data[x].TradeName + '</td><td>' + data[x].ProducData + '</td><td>' + data[x].RDate;
+                            news_html = news_html + '</td><td>' + data[x].ShelfLife +  '</td><td>' + data[x].Pprice +  '</td><td>' + data[x].Price +  '</td><td>' + data[x].Inventory + '</td></tr>';
+                            $("#t1").append(news_html);
+                        }
+                    },
+                    error: function () {}
+                });
+        });
+
+    </script>
+</head>
+<body>
+    <h1>欢迎使用超市管理系统</h1>
+    <p>查看库存信息</p>
+    <div id="d1">
+         <table border="3" cellspacing="0" cellpadding="10" width="70%" id="t1">
+
+         </table>
+    </div>
+
+</body>
+</html>
