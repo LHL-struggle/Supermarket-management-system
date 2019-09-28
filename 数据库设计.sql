@@ -4,13 +4,17 @@
 create table kucun (
     ID int(12) auto_increment primary key,
     TradeName char(100) Not Null,
-    ProducData Daate Not Null,
+    ProducData Date Not Null,
     RDate  Date  Not Null,
     ShelfLife  char(20),
     Pprice float(7),
     Price float(7),
     Inventory  int((7)
     );
+-- 在库存表中添加了销售数量 sellnum 这一属性
+alter table kucun add sellnum int(7) default 0;
+-- 在库存表中添加了出售金额 SaleAmount 这一属性
+alter table kucun add SaleAmount float(10) default 0;
 
 --+------------+-----------+------+-----+---------+----------------+
 --| Field      | Type      | Null | Key | Default | Extra          |

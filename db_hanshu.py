@@ -1,8 +1,3 @@
-# import re
-# import urllib.parse
-# import urllib.request
-# import random
-# import sys
 import json
 import pymysql
 import datetime
@@ -77,11 +72,12 @@ def check_user_name(user_name):
     返回值：校验通过返回0，用户名存在返回1
     '''
     # 连接数据库，conn为Connection对象
-    conn = pymysql.connect(conf["db_server"], conf["db_user"], conf["db_password"], conf["db_name"])
+    conn = pymysql.connect(conf["db_server"], conf["db_user"], conf["db_password"], conf["db_name1"])
     try:
         with conn.cursor() as cur:  # 获取一个游标对象(Cursor类)，用于执行SQL语句
             # 执行任意支持的SQL语句
-            cur.execute("select name from login where name=%s", (user_name,))
+            # cur.execute("select name from login where name=%s", (user_name,))
+            cur.execute("select name from user where name=%s", (user_name,))
             # 通过游标获取执行结果
             rows = cur.fetchone()
     finally:
@@ -102,12 +98,13 @@ def check_uname_pwd(user_name, password):
     返回值：校验通过返回0，校验失败返回1
     '''
     # 连接数据库，conn为Connection对象
-    conn = pymysql.connect(conf["db_server"], conf["db_user"], conf["db_password"], conf["db_name"])
+    conn = pymysql.connect(conf["db_server"], conf["db_user"], conf["db_password"], conf["db_name1"])
 
     try:
         with conn.cursor() as cur:  # 获取一个游标对象(Cursor类)，用于执行SQL语句
             # 执行任意支持的SQL语句
-            cur.execute("select name from login where name=%s and passwd=password(%s)", (user_name, password))
+            # cur.execute("select name from login where name=%s and passwd=password(%s)", (user_name, password))
+            cur.execute("select name from user where name=%s and passwd=password(%s)", (user_name, password))
             # 通过游标获取执行结果
             rows = cur.fetchone()
     finally:
@@ -128,12 +125,12 @@ def user_reg(uname, password):
     返回值：成功返回True，失败返回False
     '''
     # 连接数据库，conn为Connection对象
-    conn = pymysql.connect(conf["db_server"], conf["db_user"], conf["db_password"], conf["db_name"])
+    conn = pymysql.connect(conf["db_server"], conf["db_user"], conf["db_password"], conf["db_name1"])
 
     try:
         with conn.cursor() as cur:  # 获取一个游标对象(Cursor类)，用于执行SQL语句
             # 执行任意支持的SQL语句
-            cur.execute("insert into login (name, passwd) values (%s, password(%s))", (uname, password))
+            cur.execute("insert into user (name, passwd) values (%s, password(%s))", (uname, password))
             r = cur.rowcount
             conn.commit()
     finally:
@@ -170,6 +167,15 @@ def findall(table):
     data = sql_0.getall(select_sq0)
     return data
 
+# 将时间类型转换为字符创类型
+def date_str(data):
+    '''
+    :param data: datetime.date类型,时间数据
+    :return: 字符串型时间数据
+    '''
+    return data.strftime("%Y-%m-%d")
+
+
 # 校验ID是否存在
 def check_ID(ID):
     '''
@@ -184,6 +190,22 @@ def check_ID(ID):
         # 存在
         return 1
     return 0
+
+def check_sell(ID):
+    '''
+    :param name:
+    :return: ID存在返回1，不存在返回0
+    '''
+    # 创建数据库类的对象
+    sql = oneself_mysql()
+    select_sql = 'select * from kucun where ID=%s' % (ID,)
+    data = sql.getone(select_sql)
+    # err : 0 代表不存在，1代表存在
+    rsp = {"err": 0}
+    if data:
+        rsp["err"] = 1
+        rsp["content"] = {"TradeName": data[1], "ProducData": date_str(data[2]), "RDate":date_str(data[3]), "ShelfLife":data[4], "Price":data[6], "Inventory":data[7]}
+    return rsp
 
 # 修改产品信息
 def upda_infor(data):
@@ -219,12 +241,20 @@ def upda_infor(data):
         # 修改失败
         return 0
 
-
-
-# 将时间类型转换为字符创类型
-def date_str(data):
-    '''
-    :param data: datetime.date类型,时间数据
-    :return: 字符串型时间数据
-    '''
-    return data.strftime("%Y-%m-%d")
+# 将出售商品信息提交到数据库
+def save_infor(data):
+    print("将出售商品信息提交到数据库")
+    sql = oneself_mysql()
+    print(data)
+    # sellnum 销售数量  SaleAmount 盈利  Inventory库存
+    upda_sql = "update kucun set sellnum = sellnum + %s, SaleAmount= SaleAmount + %s, Inventory=%s where ID=%s"
+    rsp = sql.Execute_DML(upda_sql, data)
+    print(rsp)
+    if rsp == 1 or rsp == 0:
+        # 提交成功
+        print("提交成功")
+        return 1
+    else:
+        print("提交失败")
+        # 修改失败
+        return 0

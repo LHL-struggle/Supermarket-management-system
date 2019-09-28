@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect
 import flask
 import pymysql
-from db_hanshu import check_user_name, user_reg, check_uname_pwd, WriteInfor, findall, date_str, check_ID, upda_infor
+from db_hanshu import check_user_name, user_reg, check_uname_pwd, WriteInfor, findall, date_str, check_ID, upda_infor, check_sell, save_infor
 
 
 LHL = Flask(__name__)
@@ -138,9 +138,6 @@ def check_updata():
     # return render_template("infor.html")
     return flask.jsonify(rsp)
 
-
-
-
 # 校验商品ID是否存在
 @LHL.route("/check_ID")
 def Check_ID():
@@ -157,6 +154,30 @@ def sell():
         return render_template("sell.html")
     else:
         return redirect("/login")
+
+@LHL.route("/Check_sell")
+def Check_sell():
+    ID = request.args.get("ID")
+    rsp = check_sell(ID)
+    print(rsp)
+    return rsp
+
+
+@LHL.route("/Save_sell")
+def Save_sell():
+
+    ID = request.args.get("ID")                    # ID
+    Num = request.args.get("Num")                  # 出售商品数量
+    pay = request.args.get("pay")    # 盈利
+    kucun = request.args.get("kucun")    # 剩余库存
+    data = (Num, pay, kucun, ID)
+    print(data)
+    r = save_infor(data)
+    # 成功1 失败0
+    s = {"err": r}
+    print(s)
+    return s
+
 
 if __name__ == "__main__":
     # LHL.run(host="0.0.0.0", port=80, debug=True)

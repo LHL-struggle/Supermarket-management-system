@@ -5,11 +5,114 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <title>小型超市管理系统</title>
     <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
+    <script>
+        $(function(){
+            // 点击查看事件
+            <!--$("#I").click(function(){-->
+
+            $("#ID").bind('keydown', function (event) {
+                var event = window.event || arguments.callee.caller.arguments[0];
+                if (event.keyCode == 13)    {
+                    // 获取商品ID值
+                    var ID = $("#ID").val();
+                    // 通过AJAX发送请求给服务器以校验用户名是否已经存在
+                    $.ajax({
+                        type: "GET",
+                        contentType: "application/json; charset=UTF-8",
+                        dataType: "json",
+                        url: "/Check_sell",
+                        data: {"ID":ID},
+                        success: function(data){
+                            // 有这个ID
+                            if (data["err"] === 1){
+                                $("#s").css("color", "green");
+                                $("#s").text('√');
+                                console.log(data);
+                                $("#t1").html(data["content"]["TradeName"]);
+                                $("#t2").html(data["content"]["Price"]);
+                                $("#t3").html(data["content"]["Inventory"]);
+
+                                $('#Num').bind('keydown', function (event) {
+                                    var event = window.event || arguments.callee.caller.arguments[0];
+                                    if (event.keyCode == 13)    {
+                                        var num = $("#Num").val();
+                                        var price =data["content"]["Price"];
+                                        // 应付金额
+                                        var pay = num * price;
+                                        $("#pay").text(pay);
+
+                                        $('#collection').bind('keydown', function (event) {
+                                            var event = window.event || arguments.callee.caller.arguments[0];
+                                            if (event.keyCode == 13)    {
+                                                // 收款金额
+                                                var   collection = $("#collection").val();
+                                                // 找零
+                                                var change = collection - pay;
+                                                $("#change").text(change);
+                                                // 库存数量
+                                                var Inventory = data["content"]["Inventory"]
+                                                // 剩余库存数量
+                                                var kucun = Inventory - num;
+                                                $("#kucun").text(kucun);
+
+                                                // 提交事件
+                                                $("#B").click(function(){
+                                                    console.log(kucun);
+                                                    $.ajax({
+                                                        type: "GET",
+                                                        contentType: "application/json; charset=UTF-8",
+                                                        dataType: "json",
+                                                        url: "/Save_sell",
+                                                        data:{"ID":ID,"Num":num,"pay":pay,"kucun":kucun},
+                                                        timeout: 1000,
+                                                        success: function(data){
+                                                            console.log("成功");
+                                                            // err:1 保存成功，err:0 保存失败
+                                                            if (data["err"] === 1){alert("提交成功")}
+                                                            if (data["err"] === 0){alert("提交失败")}
+                                                        },
+                                                    });
+                                                });
+
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                            // 没有这个ID
+                            if(data["err"] === 0){ $("#s").css("color", "red"); $("#s").text("不存在该商品")}
+                        },
+                        error: function () {}
+                    });
+                }
+            });
+        });
+
+
+    </script>
 </head>
 <body>
     <h1>欢迎使用超市管理系统</h1>
     <p>出售商品</p>
-
-
+    <label for="ID">商品ID：</label><input type="text" id="ID" name="ID" placeholder="请输入商品ID,必填"><button type="button" id="I" style="margin-left:5px">查看</button><span id="s" style="margin-left:5px"></span>
+    <br><br>
+    <div id="d">
+        <table width="70%" cellspacing="0px" border="1">
+            <tr><td width="60px">商品名</td><td id="t1" width="100px"></td><td width="60px">价格</td><td id="t2" width="100px"></td><td width="60px">库存</td><td id="t3" width="100px"></td></tr>
+        </table>
+    </div>
+    <hr>
+    <div id="d1">
+        <form>
+            <table>
+                <tr><td>出售数量:</td><td><input type="text" id="Num" ></td></tr>
+                <tr><td>应付金额：</td><td><span id="pay" style="margin-left:5px"></span></td></tr>
+                <tr><td>收款金额:</td><td><input type="text" id="collection"></td></tr>
+                <tr><td>找零:</td><td><span id="change" style="margin-left:5px"></span></td></tr>
+                <tr><td>剩余库存数量:</td><td><span id="kucun" style="margin-left:5px"></span></td></tr>
+                <tr><td></td><td><button id="B" type="button">提交</button></td></tr>
+            </table>
+        </form>
+    </div>
 </body>
 </html>
